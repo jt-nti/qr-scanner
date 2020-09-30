@@ -216,10 +216,13 @@ export default class QrScanner {
                         }
                     };
                     onError = (e) => {
+                        const errorMessage = !e ? 'Unknown Error' : e.message || e;
+                        if (errorMessage === 'RangeError: Array size is not a small enough positive integer.') {
+                            return;
+                        }
                         qrEngine.removeEventListener('message', onMessage);
                         qrEngine.removeEventListener('error', onError);
                         clearTimeout(timeout);
-                        const errorMessage = !e ? 'Unknown Error' : (e.message || e);
                         reject('Scanner error: ' + errorMessage);
                     };
                     qrEngine.addEventListener('message', onMessage);
@@ -348,9 +351,11 @@ export default class QrScanner {
 
     _getCameraStream(facingMode, exact = false) {
         const constraintsToTry = [{
-            width: { min: 1024 }
+            width: { min: 1024 },
+            frameRate: {ideal: 5, max: 10}
         }, {
-            width: { min: 768 }
+            width: { min: 768 },
+            frameRate: {ideal: 5, max: 10}
         }, {}];
 
         if (facingMode) {
